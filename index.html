@@ -1,0 +1,93 @@
+<main id="main">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1>User_list</h1>
+                <table id="user_list" class="table table-bordered text-white">
+                    <tr>
+                        <th>action</th>
+                        <th>no</th>
+                        <th>name</th>
+                        <th>email</th>
+                        <th>mobileno</th>
+                        <th>city</th>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</main>
+<script>
+    $(document).ready(function(){
+        loaddata();
+    });
+
+    function loaddata()
+    {
+        let table=document.getElementById("user_list");
+        let rowcount = table.rows.length;
+        for(var i = 1; i < rowcount; i++)
+        {
+            table.deleteRow(1);
+        }
+        let mydata = {
+            data:{
+                id:0
+            }
+        };
+        $.ajax({
+            url: "http://localhost:8081/get",
+            type:'post',
+            data:mydata,
+            dataType:"json",
+            success: function(data) {
+                let users=data["data"];
+                let i=1;
+                users.forEach(user => {
+                    var row = table.insertRow();
+                    var cell1 = row.insertCell(0);
+                    var cell2 = row.insertCell(1);
+                    var cell3 = row.insertCell(2);
+                    var cell4 = row.insertCell(3);
+                    var cell5 = row.insertCell(4);
+                    var cell6 = row.insertCell(5);
+
+                    cell1.innerHTML = "<a class='btn btn-success' href='http://localhost:8081/create?id= "+ user.id +"'>Edit</a>";
+                    cell1.innerHTML += "<button onclick='deleteuser(" + user.id +")' class='btn btn-danger'>Delete</button>";
+                    cell2.innerHTML = i;
+                    cell3.innerHTML = user.name;
+                    cell4.innerHTML = user.email;
+                    cell5.innerHTML = user.mobileno;
+                    cell6.innerHTML = user.city;
+
+                    i++;
+
+                });
+            }
+        });
+    }
+
+    function deleteuser(userid)
+    {
+        if(confirm("sure to delete?"))
+        {
+            let mydata = {data:{id:userid}};
+            
+            $.ajax({
+            url: "http://localhost:8081/delete",
+            type:'post',
+            data:mydata,
+            dataType:"json",
+            success:function(data){
+                loaddata();
+            },
+            error: function(err){
+                console.log(err);
+            }
+            });
+
+        }
+    }
+</script>

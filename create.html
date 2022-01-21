@@ -1,0 +1,231 @@
+
+    <div class="container">
+        <table style="width: 100%;">
+            <tr>
+                <td>
+                    <input type="hidden" id="id" value="0">
+                </td>
+            </tr>
+            <tr style="width: 100%;">
+                <td style="width: 30%;font-size: 24px;">
+                    Name :
+                    
+                    
+                </td>
+                <td style="width: 70%;font-size: 24px;">
+                    <input id="name" type="text" placeholder="Enter your name" onkeyup="validatename()" />
+                    <label id="msgname" style="color: red;"></label><br><br>
+                </td>
+            </tr>
+            <tr>
+                <td style="font-size: 24px;">
+                    Email Id :
+                </td>
+                <td style="font-size: 24px;"> 
+                    <input id="email" type="text" placeholder="Enter your Email-id" onkeyup="validateemail()">
+                    <label id="msgemail" style="color: red;"></label><br><br>
+                </td>
+            </tr>
+            <tr>
+                <td style="font-size: 24px;">
+                    Mobile No.:
+                </td>
+                <td style="font-size: 24px;">
+                    <input id="mobile" type="text" onkeypress="return isNumber()" maxlength="10" onkeyup="validatemobile()" />
+                    <label id="msgmobile" style="color: red;"></label><br><br>
+                </td>
+            </tr>
+            <tr>
+                <td style="font-size: 24px;">
+                    City :
+                </td>
+                <td style="font-size: 24px;">
+                    <input id="city" type="text"  onkeyup="validatecity()">
+                    <label id="msgcity" style="color: red;"></label><br><br>
+                </td>
+            </tr>
+            <tr>
+                <td style="font-size: 24px;">
+                    <b><label>Check Your Information</label></b>&nbsp;&nbsp;<input type="checkbox" required><br> 
+                </td>
+            </tr>
+                        
+        </table>
+    
+    <div> <br><br>
+        <div id="s">
+            <button type="button" class="btn btn-success" onclick="submit()">Submit</button>
+        </div> 
+    </div>         
+        
+    <script>
+        $(document).ready(function() {
+    let id = getUrlParameter("id");
+    if(id != false)
+    {
+      $("#id").val(id);
+      let mydata = {
+          data:{
+              id:$("#id").val()
+          }
+      };
+      $.ajax({
+            url: 'http://localhost:8081/get',
+            type: 'post',            
+            data: mydata,
+            dataType:"json",
+            success: function (data) {
+              let user = data["data"][0];
+              $("#name").val(user.name);
+              $("#email").val(user.email);
+              $("#mobileno").val(user.mobileno);
+              $("#city").val(user.city);
+            },
+            error:function (err) {              
+              alert("Error");
+            }
+        });
+
+
+    }
+  });
+        function validatename(){
+            let name = $("#name").val();
+            if(name.trim()!="")
+            {
+                $("#msgname").html("");
+            }
+        }
+        function validateemail(){
+            let email = $("#email").val();
+            if(email.trim()!="")
+            {
+                $("#msgemail").html("");
+            }
+        }
+        function validatemobile(){
+            let mobileno = $("#mobile").val();
+            if(mobileno.trim()!="")
+            {
+                $("#msgmobile").html("");
+            }
+        }
+        function validatecity(){
+            let city = $("#city").val();
+            if(city.trim()!="")
+            {
+                $("#msgcity").html("");
+            }
+        }
+        function submit(){
+            let name = $("#name").val();
+            let email = $("#email").val();
+            let mobileno = $("#mobile").val();
+            let city = $("#city").val();
+
+            let validated = true;
+            $("#msgname").html("");
+            $("#msgemail").html("");
+            $("#msgmobile").html("");
+            $("#msgcity").html("");
+
+            if(name.trim()=="")
+            {
+                $("#msgname").html("Enter Name");
+                validated = false;
+            }
+            if(email.trim()=="")
+            {
+                $("#msgemail").html("Enter email");
+                validated = false;
+            }
+            else{
+                if(emailvalidate(email) == false)
+                {
+                    $("#msgemail").html("Enter valid Email");
+                    validated = false;
+                }
+            }
+            if(mobileno.trim() =="")
+            {
+                $("#msgmobile").html("Enter mobile no");
+                validated = false;
+            }
+            else{
+                if(phonevalidate(mobileno) == false)
+                {
+                    $("#msgmobile").html("Enter valid mobile no");
+                    validated = false;
+                }
+            }
+            if(city.trim()=="")
+            {
+                $("#msgcity").html("Enter city Name");
+                validated = false;
+            }
+            if(validated)
+            {
+                let mydata = {
+                    data:{
+                        id:0,
+                        name:name,
+                        email:email,
+                        mobileno:mobileno,
+                        city:city
+                    }
+                };
+                $.ajax({
+                    url: "http://localhost:8081/save",
+                    type:'post',
+                    data:mydata,
+                    dataType:"json",
+                    success: function(data) {
+                        // alert("success");
+                        window.location.href= "http://localhost:8081/"
+                    },
+                    error:function(err){
+                        alert("error");
+                    }
+                });
+                
+            }
+        }
+        function emailvalidate(email)
+        {
+           var pattern = new RegExp(/^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/);
+           var result = pattern.test(email);
+           return result;
+        }
+
+        function phonevalidate(phone)
+        {
+           var pattern = new RegExp(/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[789]\d{9}$/);
+           var result = pattern.test(phone);
+           return result;
+        } 
+        var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = window.location.search.substring(1),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+        }
+    }
+    return false;
+};
+
+    function isNumber(){
+        if(event.keyCode >= 48 && event.keyCode <= 57){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    </script>
